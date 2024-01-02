@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import signUpAnime from "../assets/login-animation.gif";
 import { BiShow, BiHide } from "react-icons/bi";
-import {Link} from 'react-router-dom'
+import {Link, useNavigate} from 'react-router-dom'
 
 const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     firstName : "",
     lastName : "",
@@ -40,6 +41,7 @@ const Signup = () => {
     if(firstName&& email&& password&& confirmPassword){
       if(password === confirmPassword){
         alert("Success")
+        navigate('/login')
       }else{
         alert("Passwords does not match")
       }
@@ -47,6 +49,8 @@ const Signup = () => {
       alert("Please fill all the credentials")
     }
   }
+
+
   return (
     <div className="p-3 md:p-4">
       <div className="w-full max-w-sm bg-white m-auto flex flex-col p-4">
