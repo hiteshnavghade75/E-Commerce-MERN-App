@@ -2,18 +2,20 @@ import React, { useState } from "react";
 import signUpAnime from "../assets/login-animation.gif";
 import { BiShow, BiHide } from "react-icons/bi";
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-hot-toast";
+import { useDispatch, useSelector } from "react-redux";
+import { loginRedux } from "../redux/userSlice";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
     email: "",
     password: "",
-    confirmPassword: "",
   });
-  console.log(formData);
+
+  const userData = useSelector((state) => state);
+  const dispatch = useDispatch();
 
   const handleShowPassword = () => {
     setShowPassword((prev) => !prev);
@@ -29,13 +31,33 @@ const Login = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const { email, password } = formData;
 
     if (email && password) {
-      alert("success");
-      navigate('/')
+      const fetchData = await fetch(
+        `${process.env.REACT_APP_SERVER_DOMAIN}/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        }
+      );
+
+      const response = await fetchData.json();
+      console.log(response);
+      toast(userData.user.firstName+ " " + response.message);
+
+      if (response.alert) {
+        dispatch(loginRedux(response));
+        setTimeout(() => {
+          navigate("/");
+        }, 1000);
+      }
+      console.log(userData)
     } else {
       alert("Please fill all the credentials");
     }
