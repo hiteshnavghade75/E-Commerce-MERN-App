@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import signUpAnime from "../assets/login-animation.gif";
 import { BiShow, BiHide } from "react-icons/bi";
 import { Link, useNavigate } from "react-router-dom";
-import { ImageToBase64 } from '../../src/utils/base-64'
+import { ImageToBase64 } from '../../src/utils/base-64';
+import { toast } from "react-hot-toast";
 
 const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -48,14 +49,30 @@ const Signup = () => {
     })
   }
 
-  const handleSubmit = (e) => {
+  console.log(process.env.REACT_APP_SERVER_DOMAIN)
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const { firstName, email, password, confirmPassword } = formData;
 
     if (firstName && email && password && confirmPassword) {
       if (password === confirmPassword) {
-        alert("Success");
-        navigate("/login");
+
+        const fetchData = await fetch(`${process.env.REACT_APP_SERVER_DOMAIN}/signup`, {
+          method : 'POST',
+          headers : {
+            'Content-Type' : 'application/json'
+          },
+          body : JSON.stringify(formData)
+        })
+
+        const response = await fetchData.json();
+        console.log(response)
+
+        toast(response.message);
+        if(response.alert){
+          navigate("/login");
+        }
       } else {
         alert("Passwords does not match");
       }
