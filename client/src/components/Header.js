@@ -51,18 +51,19 @@ const Header = () => {
           <div className="text-slate-600" onClick={handleShowMenu}>
             <div className="text-3xl cursor-pointer w-8 h-8 rounded-full overflow-hidden drop-shadow-md">
               {userData.image ? (
-                <img src={userData.image} className="h-full w-full" />
+                <img src={userData.image} className="h-full w-full" alt="user" />
               ) : (
                 <HiOutlineUserCircle />
               )}
             </div>
             {showMenu && (
               <div className="absolute right-2 bg-white py-2 shadow drop-shadow-md flex flex-col">
-                <Link to="/newProduct" className="whitespace-nowrap cursor-pointer px-2">
+                { userData.email === process.env.REACT_APP_ADMIN_EMAIL && <Link to="/newProduct" className="whitespace-nowrap cursor-pointer px-2">
                   New Product
                 </Link>
+                }
                 { userData.image ? 
-                  <p className="cursor-pointer hover px-2 text-white bg-red-500" onClick={handleLogOut}>Log out</p>
+                  <p className="cursor-pointer hover px-2 text-white bg-red-500" onClick={handleLogOut}>Log out ({userData.firstName})</p>
                   :
                   <Link to="/login" className="whitespace-nowrap cursor-pointer px-2">Login</Link>
                 }
