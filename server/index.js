@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require('cors');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv').config();
+const productRouter = require('./router/productRouter')
 
 const app = express();
 app.use(cors());
@@ -19,6 +20,7 @@ mongoose.connect(process.env.MONGODB_URL )
     console.log("Failed to connect to the DB")
 })
 
+
 // Schema 
 const userSchema = mongoose.Schema({
     firstName: String,
@@ -33,7 +35,9 @@ const userSchema = mongoose.Schema({
 })
 
 // Modal
-const usereModel = mongoose.model("user", userSchema)
+const userModel = mongoose.model("user", userSchema)
+
+app.use('/product', productRouter)
 
 // api 
 app.listen(PORT, () => {
@@ -48,14 +52,14 @@ app.get('/',(req,res) => {
 app.post('/signup', async (req, res) => {
     try {
         const { email } = req.body;
-        const existingUser = await usereModel.findOne({ email: email });
+        const existingUser = await userModel.findOne({ email: email });
         if (existingUser) {
             res.status(409).json({
                 message: "Email id already registered",
                 alert : false
             });
         } else {
-            const newUser = new usereModel(req.body);
+            const newUser = new userModel(req.body);
             await newUser.save();
             res.status(200).json({
                 message: "Successfully registered",
@@ -70,3 +74,31 @@ app.post('/signup', async (req, res) => {
     }
 });
 
+
+app.post('/login', async (req, res) => {
+    try {
+        console.log(req.body);
+        const { email } = req.body;
+        
+        // Use await to wait for the promise to resolve
+        const result = await userModel.findOne({ email: email }).select('-password -confirmPassword');
+
+        if (result) {
+            res.status(200).json({
+                message: "Login Successfully",
+                alert: true,
+                data: result
+            });
+        } else {
+            res.status(404).json({
+                message: "User not found",
+                alert: false
+            });
+        }
+    } catch (error) {
+        res.status(500).json({
+            message: "Internal Server Error",
+            error: error.message
+        });
+    }
+});
