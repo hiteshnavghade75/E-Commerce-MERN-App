@@ -18,17 +18,20 @@ import NewProduct from "./pages/NewProduct";
 import Signup from "./pages/Signup";
 import { store } from "./redux/index";
 import { Provider } from "react-redux";
+import Cart from "./pages/Cart";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<App />}>
       <Route index element={<Home />} />
-      <Route path="/menu" element={<Menu />} />
+      {/* <Route path="/menu" element={<Menu />} /> */}
+      <Route path="/menu/:filterby" element={<Menu />} />
       <Route path="/about" element={<About />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/login" element={<Login />} />
       <Route path="/newProduct" element={<NewProduct />} />
       <Route path="/signup" element={<Signup />} />
+      <Route path="/cart" element={<Cart />} />
     </Route>
   )
 );
