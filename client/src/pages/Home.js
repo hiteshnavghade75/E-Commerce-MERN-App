@@ -8,7 +8,6 @@ import AllProducts from "../components/AllProducts";
 
 const Home = () => {
   const productData = useSelector((state) => state.product.productList);
-  console.log(productData);
 
   const loadingArray = new Array(4).fill(null);
   const loadingArrayCard = new Array(10).fill(null);
@@ -18,7 +17,6 @@ const Home = () => {
     (el) => el.category === "vegetables",
     []
   );
-  console.log(homeProductsVegetables);
 
   const slideProductRef = useRef();
   const handleNextProduct = () => {
@@ -30,8 +28,7 @@ const Home = () => {
   };
 
   const categoryList = [...new Set(productData.map((el) => el.category))];
-  console.log(categoryList);
-
+ 
   return (
     <div className="p-2 md:p-4">
       <div className="md:flex gap-4 py-2">
@@ -49,11 +46,7 @@ const Home = () => {
             <span className="text-red-500">Your Home</span>
           </h2>
           <p className="py-3 text-base">
-            Lorem Ipsum is simply dummy text of the printing and typesetting
-            industry. Lorem Ipsum has been the industry's standard dummy text
-            ever since the 1500s, when an unknown printer took a galley of type
-            and scrambled it to make a type specimen book. It has survived not
-            only five centuries.
+          Welcome to our online store! Explore a world of exquisite products and curated collections. Immerse yourself in the latest trends and timeless classics. Our carefully selected items reflect quality and style. Join us on a journey through the best in fashion, technology, and lifestyle. Discover the perfect blend of innovation and elegance. Shop with confidence as we bring you the finest selections. Embrace a shopping experience that transcends time – where tradition meets modernity. Your journey to exceptional finds begins here.
           </p>
           <button className="font-bold bg-red-500 text-slate-200 px-4 py-2 rounded-md">
             Order Now
@@ -120,7 +113,7 @@ const Home = () => {
                   />
                 );
               })
-            : loadingArrayCard.map((el,index) => <Card loading={"loading"} key={index} />)}
+            : loadingArrayCard.map((el,index) => <Card loading={"loading..."} key={index} />)}
         </div>
       </div>
 

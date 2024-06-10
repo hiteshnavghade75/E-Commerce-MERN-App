@@ -1,7 +1,8 @@
 import React from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import AllProducts from "../components/AllProducts";
+import { addCartItems } from "../redux/productSlice";
 
 const Menu = () => {
   const { filterby } = useParams();
@@ -10,6 +11,13 @@ const Menu = () => {
 
   const productDisplay = productData.filter((el) => el._id === filterby)[0];
   console.log(productDisplay);
+
+  const dispatch = useDispatch()
+
+  const handleAddToCartProduct = (e) => {
+    e.stopPropagation();
+    dispatch(addCartItems(productDisplay))
+  };
 
   return (
     <div className="p-2 md:p-4">
@@ -36,7 +44,7 @@ const Menu = () => {
             <button className="bg-red-500 text-white hover:bg-red-600 rounded-md  mt-2 min-w-[150px] py-1">
               Buy
             </button>
-            <button className="bg-red-500 text-white hover:bg-red-600 rounded-md  mt-2 min-w-[150px] py-1">
+            <button className="bg-red-500 text-white hover:bg-red-600 rounded-md  mt-2 min-w-[150px] py-1" onClick={handleAddToCartProduct}>
               Add To Cart
             </button>
           </div>

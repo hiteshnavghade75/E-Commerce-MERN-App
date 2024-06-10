@@ -16,6 +16,7 @@ const AllProducts = ({ heading }) => {
   }, [productData]);
 
   const handleFilterProduct = (category) => {
+    setFilterBy(category)
     const filter = productData.filter(
       (el) => el.category.toLowerCase() === category.toLowerCase()
     );
@@ -35,8 +36,9 @@ const AllProducts = ({ heading }) => {
             return (
               <FilterProduct
                 category={el}
+                isActive={el.toLowerCase() === filterBy.toLocaleLowerCase()}
                 onClick={() => handleFilterProduct(el)}
-                key={index}
+                key={el}
               />
             );
           })
@@ -62,7 +64,7 @@ const AllProducts = ({ heading }) => {
               );
             })
           : loadingArrayCard.map((el, index) => (
-              <Card loading={"loading"} key={index} />
+              <Card loading={"loading..."} key={index} />
             ))}
       </div>
     </div>

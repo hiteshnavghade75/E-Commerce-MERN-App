@@ -2,7 +2,9 @@ const express = require("express");
 const cors = require('cors');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv').config();
-const productRouter = require('./router/productRouter')
+const Stripe = require('stripe');
+const productRouter = require('./router/productRouter');
+const bcrypt = require('bcrypt');
 
 const app = express();
 app.use(cors());
@@ -19,7 +21,6 @@ mongoose.connect(process.env.MONGODB_URL )
 .catch(() => {
     console.log("Failed to connect to the DB")
 })
-
 
 // Schema 
 const userSchema = mongoose.Schema({
@@ -49,21 +50,30 @@ app.get('/',(req,res) => {
 });
 
 
+
 app.post('/signup', async (req, res) => {
     try {
-        const { email } = req.body;
+        const { email, password } = req.body;
         const existingUser = await userModel.findOne({ email: email });
+
         if (existingUser) {
             res.status(409).json({
                 message: "Email id already registered",
-                alert : false
+                alert: false
             });
         } else {
-            const newUser = new userModel(req.body);
+            const hashedPassword = await bcrypt.hash(password, 10);
+
+            const newUser = new userModel({
+                email: email,
+                password: hashedPassword,
+            });
+
             await newUser.save();
+
             res.status(200).json({
                 message: "Successfully registered",
-                alert : true
+                alert: true
             });
         }
     } catch (error) {
@@ -74,21 +84,27 @@ app.post('/signup', async (req, res) => {
     }
 });
 
-
 app.post('/login', async (req, res) => {
     try {
-        console.log(req.body);
-        const { email } = req.body;
+        const { email, password } = req.body;
         
-        // Use await to wait for the promise to resolve
-        const result = await userModel.findOne({ email: email }).select('-password -confirmPassword');
+        const user = await userModel.findOne({ email: email });
 
-        if (result) {
-            res.status(200).json({
-                message: "Login Successfully",
-                alert: true,
-                data: result
-            });
+        if (user) {
+            const isPasswordMatch = await bcrypt.compare(password, user.password);
+
+            if (isPasswordMatch) {
+                res.status(200).json({
+                    message: "Login Successfully",
+                    alert: true,
+                    data: { email: user.email, }
+                });
+            } else {
+                res.status(401).json({
+                    message: "Incorrect password",
+                    alert: false
+                });
+            }
         } else {
             res.status(404).json({
                 message: "User not found",
@@ -102,3 +118,95 @@ app.post('/login', async (req, res) => {
         });
     }
 });
+
+
+/** Payment5 Gateway */
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
+console.log(process.env.FRONTEND_URL)
+
+
+// app.post("/checkout-payment", async (req, res) => {
+//     console.log(req.body);
+//     try {
+//         const lineItems = req.body.map((item) => {
+//             return {
+//                 price_data: {
+//                     currency: "inr",
+//                     product_data: {
+//                         name: item.productName,
+//                         // images: [item.image]
+//                     },
+//                     unit_amount: item.price * 100,
+//                 },
+//                 quantity: item.qty,
+//             };
+//         });
+
+//         const params = {
+//             submit_type: 'pay',
+//             mode: "payment",
+//             payment_method_types: ['card'],
+//             billing_address_collection: "auto",
+//             shipping_options: [{ shipping_rate: "shr_1OmFxdSI84hvQ9b0RzUkJeAE" }],
+//             line_items: lineItems,
+//             success_url: `${process.env.FRONTEND_URL}/success`,
+//             cancel_url: `${process.env.FRONTEND_URL}/cancel`,
+//         };
+
+//         const session = await stripe.checkout.sessions.create(params);
+//         res.status(200).json({ sessionId: session.id });
+//     } catch (err) {
+//         console.error("Error in /checkout-payment:", err.message);
+//         res.status(err.statusCode || 500).json({ error: "Failed to initiate payment" });
+//     }
+// });
+
+app.post("/checkout-payment", async (req, res) => {
+    try {
+        const lineItems = req.body.map((item) => {
+            return {
+                price_data: {
+                    currency: "inr",
+                    product_data: {
+                        name: item.productName,
+                        // images: [item.image]
+                    },
+                    unit_amount: item.price * 100,
+                },
+                quantity: item.qty,
+            };
+        });
+
+        const params = {
+            submit_type: 'pay',
+            mode: "payment",
+            payment_method_types: ['card'],
+            billing_address_collection: 'required',
+            shipping_options: [{ shipping_rate: "shr_1OnKvhSJcV1EyojS7yUYYhjF" }],
+            line_items: lineItems,
+            success_url: `${process.env.FRONTEND_URL}/success`,
+            cancel_url: `${process.env.FRONTEND_URL}/cancel`,
+        };
+
+        // Additional customer information
+        const customerEmail = 'hiteshnavghade75@gmail.com'; // Replace with actual customer email
+        const clientReferenceId = 'your_unique_customer_identifier'; // Replace with a unique identifier for the customer
+
+        const session = await stripe.checkout.sessions.create({
+            ...params,
+            customer_email: customerEmail,
+            client_reference_id: clientReferenceId,
+        });
+
+        res.status(200).json({ sessionId: session.id });
+    } catch (err) {
+        console.error("Error in /checkout-payment:", err.message);
+        res.status(err.statusCode || 500).json({ error: "Failed to initiate payment" });
+    }
+});
+
+
+
+
+

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import logo from "../assets/logo.png";
+import logo from "../assets/logo-ecom.png";
 import { Link } from "react-router-dom";
 import { FaCartShopping } from "react-icons/fa6";
 import { HiOutlineUserCircle } from "react-icons/hi2";
@@ -15,14 +15,14 @@ const Header = () => {
   };
 
   const userData = useSelector((state) => state.user);
-  console.log(userData);
-
   const dispatch = useDispatch();
 
   const handleLogOut = () => {
     dispatch(logoutRedux());
     toast("Logout Successfully");
   };
+
+  const cartItemNumber = useSelector((state) => state.product.cartItem)
 
   return (
     <header className="fixed shadow-md w-full h-16 px-2 md:px-4 z-50 bg-white">
@@ -46,7 +46,7 @@ const Header = () => {
             <Link to={"/cart"}>
               <FaCartShopping />
               <div className="absolute -top-1 -right-1 text-white bg-red-500 h-4 w-4 rounded-full m-0 p-0 text-sm text-center">
-                0
+                {cartItemNumber.length}
               </div>
             </Link>
           </div>
